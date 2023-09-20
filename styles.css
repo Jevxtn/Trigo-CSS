@@ -1,0 +1,104 @@
+@function isPrime($n, $primesList) {
+    @each $prime in $primesList {
+      @if ($n % $prime == 0) {
+        @return false;
+      }
+    }
+    @return true;
+  }
+  
+  @mixin primeCounter($selector, $upperBound: 2000) {
+    
+    $curr: 2;
+    $primesList: [];
+    
+    @while $curr <= $upperBound {
+      @if isPrime($curr, $primesList) {
+        $primesList: append($primesList, $curr);
+      }
+      $curr: $curr + 1;
+    }
+    :root {
+      @each $prime in $primesList {
+          --p#{$prime}: 1;
+      }
+    }
+    $mult: "1";
+    @each $prime in $primesList {
+      $mult: $mult " * var(--p#{$prime})";
+      $val: $prime;
+      @while $val <= $upperBound {
+        #{$selector}:nth-child(#{$val}n) {
+          --p#{$prime}: #{$val};
+        }
+        $val: $val * $prime;
+      }
+    }
+    
+    #{$selector} {
+      --n: calc(#{$mult});
+    }
+  }
+  
+  @include primeCounter(".blobs > circle", 100);
+  
+  @property --t {
+    syntax: '<number>'; /* <- defined as type number for the transition to work */
+    initial-value: 0;
+    inherits: true;
+  }
+  :root {
+    --t: 0;
+  }
+  
+  @keyframes timeOn {
+    50% {--t: 1}
+  }
+  
+  body {
+    animation: 30s timeOn infinite linear;
+    margin: 0;
+    padding: 0;
+    font-size: 0;
+    width: 100vw;
+    height: 100vh;
+    clear: both;
+    overflow: hidden;
+    background: #333;
+  }
+  
+  section {
+    box-sizing: border-box;
+    background: #000;
+    width: 90vw;
+    height: 90vh;
+    clear: both;
+    overflow: hidden;
+    margin: 5vh 5vw;
+    position: relative;
+    border: 5px solid white;
+  }
+  
+  .blobs > circle {
+    fill: white;
+    
+    --x: calc(sin(var(--t) + var(--n) * 74.543 + 432.43312));
+    --y: calc(cos(var(--t) + var(--n) * 2.34 + 1.432));
+    --v: calc(0.5 + 0.5 * sin(var(--n) * var(--n) * 4.343 + 2.673));
+    
+    cx: calc(10vw + var(--x) * 80vw);
+    cy: calc(10vh + var(--y) * 80vh);
+    r: calc(var(--v) * 5vw + 1vw);
+  }
+  
+  #loader {
+    display: inline-block;
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+  }
+  
+  .blobs {
+   -webkit-filter: url("#goo");
+   filter: url("#goo");
+  }
